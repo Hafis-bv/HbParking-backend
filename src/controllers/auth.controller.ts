@@ -4,6 +4,7 @@ import { prisma } from "../utils/prisma";
 import bcrypt from "bcryptjs";
 import { generateTokenAndSetCookies } from "../utils/generateTokenAndSetCookies";
 import { sendEmail } from "../utils/sendEmail";
+import { generateRegisterHtmll } from "../utils/generateRegisterHtmll";
 
 export async function register(
   req: Request,
@@ -30,16 +31,16 @@ export async function register(
         id: true,
         name: true,
         email: true,
-        placeNumber: true,
       },
     });
 
     generateTokenAndSetCookies(res, newUser.id);
 
-    sendEmail(email, "Register", "Thank you for signing up");
+    const html = generateRegisterHtmll(email);
+    sendEmail(email, "Register", html);
 
     return res
-      .status(200)
+      .status(201)
       .json({ message: "User successfully registered!", newUser });
   } catch (err) {
     console.error(err);
@@ -64,7 +65,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
       return next(new AppError("Invalid credentials", 400));
     }
 
-    const token = generateTokenAndSetCookies(res, user.id); //токен плохо помню довольно
+    const token = generateTokenAndSetCookies(res, user.id);
 
     return res.status(200).json({
       message: "Login successfully",

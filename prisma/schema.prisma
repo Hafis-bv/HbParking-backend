@@ -22,7 +22,7 @@ model User {
   name String
   email String @unique
   password String
-  placeNumber String @default("")
+  plateNumber String @default("")
   balance Float @default(0.00)
   role Role @default(USER)
   createdAt DateTime @default(now())

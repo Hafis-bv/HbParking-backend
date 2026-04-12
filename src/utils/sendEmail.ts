@@ -8,13 +8,13 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendEmail(to: string, subject: string, content: string) {
+export async function sendEmail(to: string, subject: string, html: string) {
   try {
     await transporter.sendMail({
       from: `HbParking <${process.env.SMTP_SERVER_USERNAME}>`,
       to: to,
       subject: subject,
-      html: content,
+      html: html,
     });
     console.log("Message sent successfully");
   } catch (err) {
