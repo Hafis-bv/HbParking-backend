@@ -90,11 +90,11 @@ export async function deletePlateNumber(
   }
 }
 
-export const getMyPlateNumbers = async (
+export async function getMyPlateNumbers(
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+) {
   const userId = req.user?.id;
 
   if (!userId) {
@@ -111,7 +111,6 @@ export const getMyPlateNumbers = async (
     });
   } catch (err) {
     console.log(err);
-
     return next(new AppError("Internal Server Error", 500));
   }
-};
+}

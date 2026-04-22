@@ -6,15 +6,18 @@ import cookieParser from "cookie-parser";
 import { sessionRouter } from "./routes/session.route";
 import { checkoutRouter } from "./routes/checkout.route";
 import { plateRouter } from "./routes/plateNumber.route";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./config/swagger";
 
 const app = express();
 const PORT = process.env.PORT;
 
 app.use(cookieParser());
 
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/auth", express.json(), authRouter);
 app.use("/api/zones", express.json(), zoneRouter);
-app.use("/api/plate", express.json(), plateRouter);
+app.use("/api/plates", express.json(), plateRouter);
 app.use("/api/sessions", express.json(), sessionRouter);
 app.use("/api/checkout", checkoutRouter);
 
