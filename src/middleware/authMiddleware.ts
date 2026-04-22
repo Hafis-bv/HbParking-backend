@@ -27,7 +27,7 @@ export async function authMiddleware(
         id: true,
         name: true,
         email: true,
-        plateNumber: true,
+        plateNumbers: true,
         balance: true,
         role: true,
         sessions: true,

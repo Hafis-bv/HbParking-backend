@@ -5,6 +5,7 @@ import { errorMiddleware } from "./middleware/errorMiddleware";
 import cookieParser from "cookie-parser";
 import { sessionRouter } from "./routes/session.route";
 import { checkoutRouter } from "./routes/checkout.route";
+import { plateRouter } from "./routes/plateNumber.route";
 
 const app = express();
 const PORT = process.env.PORT;
@@ -13,6 +14,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", express.json(), authRouter);
 app.use("/api/zones", express.json(), zoneRouter);
+app.use("/api/plate", express.json(), plateRouter);
 app.use("/api/sessions", express.json(), sessionRouter);
 app.use("/api/checkout", checkoutRouter);
 

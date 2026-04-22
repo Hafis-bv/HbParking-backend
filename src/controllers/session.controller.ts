@@ -8,15 +8,20 @@ export async function startSession(
   next: NextFunction,
 ) {
   const userId = req.user?.id;
-  const { zoneId } = req.body;
+  const { zoneId, plateNumberId } = req.body;
 
-  if (!userId || !zoneId) {
-    return next(new AppError("userId and zoneId are required", 400));
+  if (!userId || !zoneId || !plateNumberId) {
+    return next(
+      new AppError("userId, zoneId and plateNumberId are required", 400),
+    );
   }
 
   try {
     const existingSession = await prisma.session.findFirst({
-      where: { id: userId, endTime: null },
+      where: {
+        plateNumberId,
+        endTime: null,
+      },
     });
     if (existingSession) {
       return next(new AppError("You alredy have an active session", 400));
@@ -36,15 +41,30 @@ export async function startSession(
       return next(new AppError("Zone not found", 400));
     }
 
+    const plateNumber = await prisma.plateNumber.findUnique({
+      where: { id: plateNumberId },
+    });
+
+    if (!plateNumber) {
+      return next(new AppError("Plate number not found", 404));
+    }
+
+    if (plateNumber.userId !== userId) {
+      return next(
+        new AppError("This plate number does not belong to the user", 400),
+      );
+    }
+
     const session = await prisma.session.create({
       data: {
         userId,
         zoneId,
+        plateNumberId,
       },
-      include: { zone: true, user: true },
+      include: { zone: true, user: true, plateNumber: true },
     });
 
-    return res.status(201).json({
+    return res.json({
       success: true,
       message: "Session created successfully",
       session,
@@ -92,7 +112,7 @@ export async function endSession(
 
       const hours = Math.ceil(paidMinutes / 60);
 
-      totalCost = hours * session.zone.pricePerHour;
+      totalCost = Number((hours * session.zone.pricePerHour).toFixed(1));
     }
 
     if (session.user.balance < totalCost) {
@@ -139,7 +159,7 @@ export async function getSession(
 
     const session = await prisma.session.findFirst({
       where: { userId, endTime: null },
-      include: { zone: true },
+      include: { zone: true, plateNumber: true },
     });
 
     return res.json(session);
