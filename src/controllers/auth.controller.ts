@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { generateTokenAndSetCookies } from "../utils/generateTokenAndSetCookies";
 import { sendEmail } from "../utils/sendEmail";
 import { generateRegisterHtmll } from "../utils/generateRegisterHtmll";
+import admin from "../lib/firebaseAdmin";
 
 export async function register(
   req: Request,
@@ -12,65 +13,35 @@ export async function register(
   next: NextFunction,
 ) {
   try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return next(new AppError("All fields are required", 400));
+    const { token } = req.body;
+    if (!token) {
+      return next(new AppError("Token is required", 401));
     }
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+
+    const { uid, email } = await admin.auth().verifyIdToken(token);
+
+    if (!email) {
+      return next(new AppError("Email is required", 400));
+    }
+
+    const existingUser = await prisma.user.findUnique({ where: { id: uid } });
     if (existingUser) {
-      return next(new AppError("User alredy exists", 400));
+      return next(new AppError("User already exists", 400));
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await prisma.user.create({
+
+    const user = await prisma.user.create({
       data: {
-        name,
+        id: uid,
         email,
-        password: hashedPassword,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
       },
     });
-
-    generateTokenAndSetCookies(res, newUser.id);
 
     const html = generateRegisterHtmll(email);
     sendEmail(email, "Register", html);
 
     return res
       .status(201)
-      .json({ message: "User successfully registered!", newUser });
-  } catch (err) {
-    console.error(err);
-    return next(new AppError("Internal Server Error", 500));
-  }
-}
-
-export async function login(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return next(new AppError("All fields are required", 400));
-    }
-
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return next(new AppError("Invalid credentials", 400));
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return next(new AppError("Invalid credentials", 400));
-    }
-
-    const token = generateTokenAndSetCookies(res, user.id);
-
-    return res.json({
-      message: "Login successfully",
-      user: { id: user.id, name: user.name, email: user.email },
-    });
+      .json({ message: "User successfully registered!", user });
   } catch (err) {
     console.error(err);
     return next(new AppError("Internal Server Error", 500));
@@ -78,12 +49,17 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 }
 
 export async function logout(req: Request, res: Response, next: NextFunction) {
-  res
-    .clearCookie("token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    })
-    .json({ message: "Logged out successfully" });
+  const { token } = req.body;
+  if (!token) {
+    return next(new AppError("Token is required", 401));
+  }
+
+  try {
+    const { uid } = await admin.auth().verifyIdToken(token);
+    await admin.auth().revokeRefreshTokens(uid);
+    return res.json({ message: "Logged out successfully" });
+  } catch (err) {
+    console.error(err);
+    return next(new AppError("Internal Server Error", 500));
+  }
 }

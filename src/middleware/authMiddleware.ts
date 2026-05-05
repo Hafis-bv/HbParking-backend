@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { AppError } from "../utils/AppError";
 import { prisma } from "../utils/prisma";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import admin from "../lib/firebaseAdmin";
 
 export async function authMiddleware(
   req: Request,
@@ -14,15 +15,10 @@ export async function authMiddleware(
       return next(new AppError("Not authorized, no token found", 401));
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-    const { userId } = decoded as JwtPayload;
-
-    if (!userId) {
-      return next(new AppError("Not authorized, invalid token", 401));
-    }
+    const { uid } = await admin.auth().verifyIdToken(token);
 
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: uid },
       select: {
         id: true,
         name: true,
