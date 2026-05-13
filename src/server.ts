@@ -8,9 +8,17 @@ import { checkoutRouter } from "./routes/checkout.route";
 import { plateRouter } from "./routes/plateNumber.route";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger";
+import cors from "cors";
 
 const app = express();
 const PORT = process.env.PORT;
+
+app.use(
+  cors({
+    origin: [process.env.CLIENT_URL!],
+    credentials: true,
+  }),
+);
 
 app.use(cookieParser());
 

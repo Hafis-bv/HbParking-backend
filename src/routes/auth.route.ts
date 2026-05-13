@@ -1,6 +1,5 @@
 import { Request, Response, Router } from "express";
 import { register } from "../controllers/auth.controller";
-import { login } from "../controllers/auth.controller";
 import { logout } from "../controllers/auth.controller";
 import { authMiddleware } from "../middleware/authMiddleware";
 
@@ -71,61 +70,6 @@ const router = Router();
  *         description: Internal server error
  */
 router.post("/register", register);
-
-/**
- * @swagger
- * /api/auth/login:
- *   post:
- *     summary: Log in a user
- *     description: Authenticates a user with email and password, then sets a JWT authentication cookie.
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: parking@example.com
- *               password:
- *                 type: string
- *                 format: password
- *                 example: 12345678
- *     responses:
- *       200:
- *         description: Login successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Login successfully
- *                 user:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                       example: 75c39876-0062-452a-b98e-5074d9a48ff6
- *                     name:
- *                       type: string
- *                       example: Parking
- *                     email:
- *                       type: string
- *                       example: parking@example.com
- *       400:
- *         description: Invalid credentials or missing fields
- *       500:
- *         description: Internal server error
- */
-router.post("/login", login);
 
 /**
  * @swagger
