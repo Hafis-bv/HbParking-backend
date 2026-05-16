@@ -72,7 +72,13 @@ export async function getMe(req: Request, res: Response, next: NextFunction) {
   try {
     const { uid } = await admin.auth().verifyIdToken(token);
 
-    const user = await prisma.user.findUnique({ where: { id: uid } });
+    const user = await prisma.user.findUnique({
+      where: { id: uid },
+      include: {
+        sessions: true,
+        plateNumbers: true,
+      },
+    });
     if (!user) {
       return next(new AppError("User not found", 404));
     }
