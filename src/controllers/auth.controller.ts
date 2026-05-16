@@ -63,3 +63,23 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
     return next(new AppError("Internal Server Error", 500));
   }
 }
+
+export async function getMe(req: Request, res: Response, next: NextFunction) {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return next(new AppError("Token is required", 401));
+  }
+  try {
+    const { uid } = await admin.auth().verifyIdToken(token);
+
+    const user = await prisma.user.findUnique({ where: { id: uid } });
+    if (!user) {
+      return next(new AppError("User not found", 404));
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    return next(new AppError("Internal Server Error", 500));
+  }
+}

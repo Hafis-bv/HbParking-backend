@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { register } from "../controllers/auth.controller";
+import { getMe, register } from "../controllers/auth.controller";
 import { logout } from "../controllers/auth.controller";
 import { authMiddleware } from "../middleware/authMiddleware";
 
@@ -118,8 +118,6 @@ router.post("/logout", logout);
  *       500:
  *         description: Internal server error
  */
-router.get("/me", authMiddleware, (req: Request, res: Response) => {
-  return res.json({ user: req.user });
-});
+router.get("/me", getMe);
 
 export { router as authRouter };
