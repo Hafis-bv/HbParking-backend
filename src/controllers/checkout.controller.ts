@@ -45,8 +45,8 @@ export async function createCheckoutSession(
         topUpAmount: balance.toString(),
       },
 
-      success_url: `${process.env.CLIENT_URL}/success`,
-      cancel_url: `${process.env.CLIENT_URL}/cancel`,
+      success_url: `${process.env.CLIENT_URL}/checkout/success`,
+      cancel_url: `${process.env.CLIENT_URL}/checkout/cancel`,
     });
 
     return res.json({ url: session.url });

@@ -3,7 +3,6 @@ import { Sessions } from "./sessions";
 
 export interface User {
   id: string;
-  name: string;
   email: string;
   createdAt: Date;
   plateNumbers: PlateNumbers[];

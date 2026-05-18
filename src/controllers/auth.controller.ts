@@ -1,8 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../utils/AppError";
 import { prisma } from "../utils/prisma";
-import bcrypt from "bcryptjs";
-import { generateTokenAndSetCookies } from "../utils/generateTokenAndSetCookies";
 import { sendEmail } from "../utils/sendEmail";
 import { generateRegisterHtmll } from "../utils/generateRegisterHtmll";
 import admin from "../lib/firebaseAdmin";
