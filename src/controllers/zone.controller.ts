@@ -1,14 +1,25 @@
 import { NextFunction, Request, Response } from "express";
 import { prisma } from "../utils/prisma";
 import { AppError } from "../utils/AppError";
+import Redis from "ioredis";
+import { redis } from "../lib/redis";
 
 export async function getAllZones(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
+  const CACHE_TTL = 300;
+
   try {
+    const cached = await redis.get("zones");
+
+    if (cached) {
+      return res.json(JSON.parse(cached));
+    }
+
     const zones = await prisma.zone.findMany();
+    await redis.setex("zones", CACHE_TTL, JSON.stringify(zones));
 
     return res.json(zones);
   } catch (err) {

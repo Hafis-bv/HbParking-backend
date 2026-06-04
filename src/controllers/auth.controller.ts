@@ -75,7 +75,7 @@ export async function getMe(req: Request, res: Response, next: NextFunction) {
       include: {
         sessions: true,
         plateNumbers: true,
-      },
+      },  
     });
     if (!user) {
       return next(new AppError("User not found", 404));
